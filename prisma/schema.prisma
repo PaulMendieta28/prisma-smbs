@@ -1,0 +1,78 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Course {
+  id          Int       @id @default(autoincrement())
+  course_name String
+  description String?
+  start_date  DateTime?
+  end_date    DateTime?
+  topics      Topic[]
+  coaches     Coach[]
+}
+
+model Topic {
+  id                  Int                   @id @default(autoincrement())
+  topic_name          String
+  description         String?
+  duration            Int?
+  course_id           Int?
+  course              Course?               @relation(fields: [course_id], references: [id])
+  schedules           Schedule[]
+  CoachTopic          CoachTopic[]
+  CoachTopicSchedule  CoachTopicSchedule[]
+}
+
+model Coach {
+  id                  Int                   @id @default(autoincrement())
+  coach_name          String
+  email               String?
+  phone_number        String?
+  course_id           Int?
+  course              Course?               @relation(fields: [course_id], references: [id])
+  schedules           Schedule[]
+  CoachTopic          CoachTopic[]
+  CoachTopicSchedule  CoachTopicSchedule[]
+}
+
+model Schedule {
+  id                  Int                   @id @default(autoincrement())
+  coach_id            Int?
+  topic_id            Int?
+  schedule_time       DateTime?
+  schedule_day        String?
+  schedule_location   String?
+  coach               Coach?                @relation(fields: [coach_id], references: [id])
+  topic               Topic?                @relation(fields: [topic_id], references: [id])
+  CoachTopicSchedule  CoachTopicSchedule[]
+}
+
+model CoachTopic {
+  id                  Int                   @id @default(autoincrement())
+  coach_id            Int
+  topic_id            Int
+  coach               Coach                 @relation(fields: [coach_id], references: [id])
+  topic               Topic                 @relation(fields: [topic_id], references: [id])
+}
+
+model CoachTopicSchedule {
+  id                  Int                   @id @default(autoincrement())
+  coach_id            Int
+  topic_id            Int
+  schedule_id         Int
+  coach               Coach                 @relation(fields: [coach_id], references: [id])
+  topic               Topic                 @relation(fields: [topic_id], references: [id])
+  schedule            Schedule              @relation(fields: [schedule_id], references: [id])
+}
